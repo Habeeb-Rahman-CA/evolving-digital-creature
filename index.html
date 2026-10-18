@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EVOLVE // Digital Creatures</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Minimalist Top Bar -->
+    <header class="top-bar">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3" />
+            <circle cx="12" cy="12" r="4" fill="currentColor" />
+          </svg>
+        </div>
+        <h1>EVOLVE</h1>
+      </div>
+
+      <div class="sim-stats-bar">
+        <div class="stat-pill">
+          <span class="stat-label">POP</span>
+          <span class="stat-value" id="stat-population">0</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-label">FOOD</span>
+          <span class="stat-value" id="stat-food">0</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-label">GEN</span>
+          <span class="stat-value" id="stat-generation">1</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-label">B / D</span>
+          <span class="stat-value" id="stat-births-deaths">0/0</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-label">TIME</span>
+          <span class="stat-value" id="stat-time">0s</span>
+        </div>
+      </div>
+
+      <!-- Icon-Only Playback Controls -->
+      <div class="playback-controls">
+        <button id="btn-toggle-play" class="btn btn-icon-only active" title="Pause / Resume" aria-label="Pause or Resume">
+          <!-- Pause SVG (swapped via JS when paused) -->
+          <svg id="icon-pause" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="6" y="4" width="4" height="16" />
+            <rect x="14" y="4" width="4" height="16" />
+          </svg>
+          <svg id="icon-play" class="hidden" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="6,4 20,12 6,20" />
+          </svg>
+        </button>
+
+        <div class="speed-group" role="group" aria-label="Simulation speed">
+          <button class="btn btn-icon-only btn-speed active" data-speed="1" title="Normal Speed (1x)" aria-label="Speed 1x">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="8,5 18,12 8,19" />
+            </svg>
+          </button>
+          <button class="btn btn-icon-only btn-speed" data-speed="2" title="Fast Speed (2x)" aria-label="Speed 2x">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="4,5 13,12 4,19" />
+              <polygon points="12,5 21,12 12,19" />
+            </svg>
+          </button>
+          <button class="btn btn-icon-only btn-speed" data-speed="5" title="Hyper Speed (5x)" aria-label="Speed 5x">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="2,5 9,12 2,19" />
+              <polygon points="9,5 16,12 9,19" />
+              <polygon points="16,5 23,12 16,19" />
+            </svg>
+          </button>
+          <button class="btn btn-icon-only btn-speed" data-speed="10" title="Max Warp (10x)" aria-label="Speed 10x">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="13,2 4,14 11,14 9,22 20,10 13,10" />
+            </svg>
+          </button>
+        </div>
+
+        <button id="btn-reset" class="btn btn-icon-only" title="Reset Ecosystem" aria-label="Reset Ecosystem">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square">
+            <path d="M3 12a9 9 0 1 0 3-6.7" />
+            <polyline points="3 3 3 9 9 9" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="main-grid">
+      <!-- Left Panel: Minimalist Trait & Selection Sliders -->
+      <aside class="panel controls-panel">
+        <section class="control-section">
+          <div class="section-header">
+            <h2>TRAITS</h2>
+            <span class="badge" id="trait-target-badge">SPAWN</span>
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <label for="slider-speed">SPEED</label>
+              <span class="control-val" id="val-speed">2.2</span>
+            </div>
+            <input type="range" id="slider-speed" min="0.6" max="5.0" step="0.1" value="2.2" />
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <label for="slider-vision">VISION</label>
+              <span class="control-val" id="val-vision">90</span>
+            </div>
+            <input type="range" id="slider-vision" min="20" max="220" step="5" value="90" />
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <label for="slider-efficiency">EFFICIENCY</label>
+              <span class="control-val" id="val-efficiency">1.00</span>
+            </div>
+            <input type="range" id="slider-efficiency" min="0.4" max="2.5" step="0.05" value="1.0" />
+          </div>
+
+          <div class="button-row">
+            <button id="btn-spawn-custom" class="btn btn-icon-only" title="Spawn 5 Creatures with these traits" aria-label="Spawn Creatures">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+            <button id="btn-apply-all" class="btn btn-icon-only" title="Apply these traits to all living creatures" aria-label="Apply Traits to All">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <polyline points="4 12 9 17 20 6" />
+              </svg>
+            </button>
+          </div>
+        </section>
+
+        <!-- Mutation & Selection -->
+        <section class="control-section">
+          <div class="section-header">
+            <h2>SELECTION</h2>
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <label for="slider-mutation-rate">MUTATION %</label>
+              <span class="control-val" id="val-mutation-rate">75%</span>
+            </div>
+            <input type="range" id="slider-mutation-rate" min="0" max="100" step="5" value="75" />
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <label for="slider-mutation-step">MUTATION Δ</label>
+              <span class="control-val" id="val-mutation-step">15%</span>
+            </div>
+            <input type="range" id="slider-mutation-step" min="2" max="40" step="1" value="15" />
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <label for="slider-metabolism">DRAIN</label>
+              <span class="control-val" id="val-metabolism">1.0x</span>
+            </div>
+            <input type="range" id="slider-metabolism" min="0.3" max="2.5" step="0.1" value="1.0" />
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <label for="slider-repro-threshold">SPLIT NRG</label>
+              <span class="control-val" id="val-repro-threshold">150</span>
+            </div>
+            <input type="range" id="slider-repro-threshold" min="90" max="260" step="10" value="150" />
+          </div>
+        </section>
+
+        <!-- Environment & Display -->
+        <section class="control-section">
+          <div class="section-header">
+            <h2>WORLD</h2>
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <label for="slider-food-rate">FOOD / SEC</label>
+              <span class="control-val" id="val-food-rate">3.5</span>
+            </div>
+            <input type="range" id="slider-food-rate" min="0.5" max="12" step="0.5" value="3.5" />
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <label for="slider-food-energy">FOOD NRG</label>
+              <span class="control-val" id="val-food-energy">40</span>
+            </div>
+            <input type="range" id="slider-food-energy" min="15" max="90" step="5" value="40" />
+          </div>
+
+          <div class="button-row toggle-icon-row">
+            <button id="btn-toggle-vision" class="btn btn-icon-only" title="Toggle Vision Rings" aria-label="Toggle Vision Rings">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+            <button id="btn-toggle-energy" class="btn btn-icon-only active" title="Toggle Energy Rings" aria-label="Toggle Energy Rings">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="9" stroke-dasharray="14 6" />
+                <circle cx="12" cy="12" r="3" fill="currentColor" />
+              </svg>
+            </button>
+          </div>
+        </section>
+      </aside>
+
+      <!-- Center: Ecosystem Simulation Canvas -->
+      <section class="canvas-container">
+        <div class="canvas-wrapper" id="canvas-wrapper">
+          <canvas id="sim-canvas"></canvas>
+
+          <!-- Minimalist HUD Overlay -->
+          <div class="canvas-overlay-top">
+            <div class="trait-summary-cards">
+              <div class="mini-card">
+                <span class="mini-label">SPD</span>
+                <span class="mini-val" id="avg-speed">2.20</span>
+              </div>
+              <div class="mini-card">
+                <span class="mini-label">VIS</span>
+                <span class="mini-val" id="avg-vision">90</span>
+              </div>
+              <div class="mini-card">
+                <span class="mini-label">EFF</span>
+                <span class="mini-val" id="avg-efficiency">1.00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Selected Creature Inspector Card -->
+          <div class="inspector-card hidden" id="inspector-card">
+            <div class="inspector-header">
+              <div>
+                <h3 id="insp-title">#1</h3>
+                <span class="insp-subtitle" id="insp-gen">GEN 1</span>
+              </div>
+              <button id="btn-close-inspector" class="btn btn-icon-only btn-sm" title="Close Inspector" aria-label="Close Inspector">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <div class="inspector-grid">
+              <div class="insp-item">
+                <span>NRG</span>
+                <strong id="insp-energy">100</strong>
+              </div>
+              <div class="insp-item">
+                <span>AGE</span>
+                <strong id="insp-age">0.0s</strong>
+              </div>
+              <div class="insp-item">
+                <span>KIDS</span>
+                <strong id="insp-children">0</strong>
+              </div>
+              <div class="insp-item">
+                <span>BURN</span>
+                <strong id="insp-burn">0.0/s</strong>
+              </div>
+            </div>
+            <div class="inspector-actions">
+              <button id="btn-mutate-selected" class="btn btn-icon-only" title="Mutate Creature Now" aria-label="Mutate Creature">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="13,2 4,14 11,14 9,22 20,10 13,10" />
+                </svg>
+              </button>
+              <button id="btn-clone-selected" class="btn btn-icon-only" title="Force Cell Division" aria-label="Force Cell Division">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="8" cy="12" r="5" />
+                  <circle cx="16" cy="12" r="5" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Sidebar: Monochrome Charts & Log -->
+      <aside class="panel charts-panel">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>TRAIT EVOLUTION</h3>
+            <div class="chart-legend">
+              <span class="legend-item"><i class="line-key solid-key"></i>SPD</span>
+              <span class="legend-item"><i class="line-key dashed-key"></i>VIS</span>
+              <span class="legend-item"><i class="line-key dotted-key"></i>EFF</span>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="chart-traits"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>POPULATION</h3>
+            <div class="chart-legend">
+              <span class="legend-item"><i class="line-key solid-key"></i>POP</span>
+              <span class="legend-item"><i class="line-key dashed-key"></i>FOOD</span>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="chart-population"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>DISTRIBUTION</h3>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="chart-distribution"></canvas>
+          </div>
+        </div>
+
+        <div class="selection-log-card">
+          <h3>LOG</h3>
+          <ul id="evolution-log" class="evolution-log"></ul>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="simulation.js"></script>
+  <script src="charts.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
